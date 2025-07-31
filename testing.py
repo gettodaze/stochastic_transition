@@ -28,24 +28,13 @@ from warnings import simplefilter
 import sklearn.decomposition
 
 from util import Paths
+import util
 
 sns.set(context="paper", style="white", font_scale=1.5, rc={"lines.linewidth": 2.5})
 sns.set_palette("muted")
 
 simplefilter(action="ignore", category=FutureWarning)
-mpl.rcParams["svg.fonttype"] = "none"
-mpl.rcParams["font.sans-serif"] = "Arial"
-mpl.rcParams["pdf.fonttype"] = 42
-params = {
-    "backend": "ps",
-    "axes.labelsize": 11,
-    "text.fontsize": 11,
-    "legend.fontsize": 11,
-    "xtick.labelsize": 11,
-    "ytick.labelsize": 11,
-    "text.usetex": False,
-    "figure.figsize": [10 / 2.54, 6 / 2.54],
-}
+util.configure_mpl()
 mpl.rcParams["axes.xmargin"] = 0
 mpl.rcParams["axes.ymargin"] = 0
 

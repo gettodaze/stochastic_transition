@@ -19,7 +19,6 @@ from __future__ import division
 import numpy as np
 import pylab as pl
 import matplotlib.pyplot as plt
-import matplotlib as mpl
 
 
 from warnings import simplefilter
@@ -28,21 +27,10 @@ import seaborn as sns
 from scipy.optimize import curve_fit
 
 from util import Paths
+import util
 
 simplefilter(action="ignore", category=FutureWarning)
-mpl.rcParams["svg.fonttype"] = "none"
-mpl.rcParams["font.sans-serif"] = "Arial"
-mpl.rcParams["pdf.fonttype"] = 42
-params = {
-    "backend": "ps",
-    "axes.labelsize": 11,
-    "text.fontsize": 11,
-    "legend.fontsize": 11,
-    "xtick.labelsize": 11,
-    "ytick.labelsize": 11,
-    "text.usetex": False,
-    "figure.figsize": [10 / 2.54, 6 / 2.54],
-}
+util.configure_mpl()
 
 
 def exp_fit(x, a, b):

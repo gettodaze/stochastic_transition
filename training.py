@@ -19,25 +19,14 @@ from __future__ import division
 import numpy as np
 import numba
 import matplotlib.pyplot as plt
-import matplotlib as mpl
 from tqdm import tqdm
 from warnings import simplefilter
 from numpy import linalg as LA
 
+import util
+
 simplefilter(action="ignore", category=FutureWarning)
-mpl.rcParams["svg.fonttype"] = "none"
-mpl.rcParams["font.sans-serif"] = "Arial"
-mpl.rcParams["pdf.fonttype"] = 42
-params = {
-    "backend": "ps",
-    "axes.labelsize": 11,
-    "text.fontsize": 11,
-    "legend.fontsize": 11,
-    "xtick.labelsize": 11,
-    "ytick.labelsize": 11,
-    "text.usetex": False,
-    "figure.figsize": [10 / 2.54, 6 / 2.54],
-}
+util.configure_mpl()
 
 # transition_prob = [[0,1/2,1/2,0,0],[1/3,0,1/3,1/3,0],[1/3,0,0,1/3,1/3],[0,1/2,1/2,0,0],[0,0,1,0,0]]
 # state_list = [0, 1, 2, 3,4]
