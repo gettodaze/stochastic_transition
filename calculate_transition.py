@@ -37,7 +37,6 @@ def exp_fit(x, a, b):
 
 def run_simulation():
     transition_prob = [[0, 0.1, 0.9], [0.1, 0, 0.9], [0.5, 0.5, 0]]
-    pat_list = [0, 1, 2]
     # transition_prob = [[0,1/2,1/2,0,0],[1/3,0,1/3,1/3,0],[1/3,0,0,1/3,1/3],[0,1/2,1/2,0,0],[0,0,1,0,0]]
     # pat_list = [0, 1, 2, 3,4]
     # os.chdir('simulation_9')
@@ -89,10 +88,8 @@ def run_simulation():
             pat_color.append(pat_color_[5])
 
     # print(np.shape(pat_color))
-    event_start = []
 
     state_start_stop = []
-    start = 0
     duration_list = []
     for i in range(plot_len):
         max_id = np.argmax(mean_firing_rate[:, i])
@@ -229,7 +226,7 @@ def run_simulation():
 
     cax = plt.imshow((np.array(transition_prob).T), cmap="RdPu", origin="lower")
 
-    cbar = fig.colorbar(cax, orientation="vertical")
+    fig.colorbar(cax, orientation="vertical")
 
     plt.xlabel("From", fontsize=10)
     plt.ylabel("To", fontsize=10)
@@ -247,7 +244,7 @@ def run_simulation():
 
     cax = plt.imshow((normed_transition_estimated).T, cmap="RdPu", origin="lower")
 
-    cbar = fig.colorbar(cax, orientation="vertical")
+    fig.colorbar(cax, orientation="vertical")
 
     plt.xlabel("From", fontsize=10)
     plt.ylabel("To", fontsize=10)

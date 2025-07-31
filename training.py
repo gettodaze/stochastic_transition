@@ -82,10 +82,6 @@ def run_simulation():
 
     n_sim = 1
     state_list = np.zeros((simtime_len, n_sim))
-    error_E_square = np.zeros((simtime_len, n_sim))  # error for E plasticity
-    error_I_square = np.zeros((simtime_len, n_sim))  # error for I plasticity
-
-    error_E_square2 = np.zeros((simtime_len, n_sim))  # error for E plasticity
 
     state3_start_time = []
 
@@ -101,8 +97,6 @@ def run_simulation():
 
         Ext_potential = np.zeros(simtime_len)
         f_list = np.zeros(simtime_len)
-        x_within_list = np.zeros(simtime_len)
-        x_between_list = np.zeros(simtime_len)
 
         W_E = np.ones((N, N)) / np.sqrt(p_connect * N_E) * 1  # E connections
         W_E[0:N_E, 0:N_E] *= 0.1
