@@ -47,14 +47,12 @@ def run_simulation():
     W_rec = np.loadtxt(Paths.INIT_WEIGHTS_E, delimiter=",")
     W_I = np.loadtxt(Paths.INIT_WEIGHTS_I, delimiter=",")
 
-    transition_prob = [[0, 0.1, 0.9], [0.1, 0, 0.9], [0.5, 0.5, 0]]
     pat_list = [0, 1, 2]
 
     # transition_prob = [[0,1/2,1/2,0,0],[1/3,0,1/3,1/3,0],[1/3,0,0,1/3,1/3],[0,1/2,1/2,0,0],[0,0,1,0,0]]
     # pat_list = [0, 1, 2, 3,4]
     N = len(W_rec[0, :])
     N_E = int(N * 1 / 2)
-    N_I = N - N_E
 
     n_pat = len(set(pat_list))
 
@@ -84,10 +82,8 @@ def run_simulation():
     dt = 1
     test_len = int(100 * 1000 / dt)
     test_len2 = int(100 * 1000 / dt)
-    plot_len = test_len2
 
     gain = 1
-    width = 200
     y = np.random.rand(N)
 
     f = g(y)
@@ -95,7 +91,7 @@ def run_simulation():
     tau_m = 15
     tau_syn = 5
 
-    n_input = 100 * n_pat
+    100 * n_pat
     pat_color = sns.color_palette("Set2")
     max_rate = 0.05
 
@@ -115,8 +111,6 @@ def run_simulation():
 
     gain = 1
 
-    width = 200
-
     y = np.random.rand(N)
 
     f = g(y)
@@ -124,37 +118,26 @@ def run_simulation():
     tau_m = 15
     tau_syn = 5
 
-    n_input = 100 * n_pat
-
-    p_input = 1
-    p_rec = 1
+    100 * n_pat
 
     I_syn = np.random.rand(N) / tau_m / tau_syn
     PSP = np.zeros(N)
 
     id_rec = np.zeros(N, dtype=bool)
 
-    mu = np.zeros(N)
-    mu_square = np.zeros(N) + 1
-
-    gamma_mu = 0.0001
-    gamma_mu_square = gamma_mu
-
-    count = 0
-
-    g_cp = 2
+    np.zeros(N)
+    np.zeros(N) + 1
 
     pat_mat_supervise = np.zeros((N, n_pat))
     for i in range(n_pat):
         pat_mat_supervise[int(i * N_E / n_pat) : int((i + 1) * N_E / n_pat), i] = 0.5
 
     max_trace = np.zeros(N) + 1
-    min_trace = np.zeros(N) + 10 ** (-5)
+    np.zeros(N) + 10 ** (-5)
 
-    max_trace_exc = np.zeros(N) + 1
+    np.zeros(N) + 1
 
     tau_max = 10 * 1000
-    tau_max_exc = 10 * 1000
 
     const_noise = np.zeros(N)
     const_noise[N_E:] = 0
@@ -163,14 +146,10 @@ def run_simulation():
     """
     Spont1
     """
-    pat_start = 0
     pat_start_list_blank = []
     for i in range(n_pat):
         pat_start_list_blank.append([])
-    count = 0
-    pattern_id = 0
 
-    pat_count = 0
     for i in tqdm(range(test_len), desc="[spont1]"):
         I_syn = (1.0 - dt / tau_syn) * I_syn
         I_syn[id_rec] += 1 / tau_m / tau_syn
@@ -263,7 +242,6 @@ def run_simulation():
     np.savetxt("mean_std_vol.txt", mean_std_vol, delimiter=",")
 
     mean_firing_rate = np.zeros((n_pat, test_len2))
-    count = 0
     for i in range(n_pat):
         mean_firing_rate[i, :] = np.mean(
             f_list[i * int(N_E / n_pat) : (i + 1) * int(N_E / n_pat), 0:test_len2],
@@ -281,7 +259,6 @@ def run_simulation():
     np.savetxt("variance_explained.txt", pca.explained_variance_ratio_, delimiter=",")
 
     mean_firing_rate_filtered_spikes = np.zeros((n_pat, test_len2))
-    count = 0
     for i in range(n_pat):
         mean_firing_rate_filtered_spikes[i, :] = np.mean(
             filtered_spikes_list[
