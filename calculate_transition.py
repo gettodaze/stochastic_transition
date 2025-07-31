@@ -27,6 +27,8 @@ from sklearn.preprocessing import normalize
 import seaborn as sns
 from scipy.optimize import curve_fit
 
+from util import Paths
+
 simplefilter(action="ignore", category=FutureWarning)
 mpl.rcParams["svg.fonttype"] = "none"
 mpl.rcParams["font.sans-serif"] = "Arial"
@@ -75,7 +77,7 @@ transition_prob[14, [x - 1 for x in [1, 12, 13, 14]]] = 1
 transition_prob = normalize(transition_prob, axis=1, norm='l1')
 pat_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
 """
-mean_firing_rate = np.loadtxt("assembly_acvitities.txt", delimiter=",")
+mean_firing_rate = np.loadtxt(Paths.ASSEMBLY_ACVITITIES, delimiter=",")
 
 activation_threshold = (
     np.max(mean_firing_rate, axis=1) * 0.5

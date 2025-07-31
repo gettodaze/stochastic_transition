@@ -27,6 +27,8 @@ from matplotlib import gridspec
 from warnings import simplefilter
 import sklearn.decomposition
 
+from util import Paths
+
 sns.set(context="paper", style="white", font_scale=1.5, rc={"lines.linewidth": 2.5})
 sns.set_palette("muted")
 
@@ -49,11 +51,9 @@ mpl.rcParams["axes.ymargin"] = 0
 
 epochs = 1
 for loop in [0]:
-    W_rec = np.loadtxt("W_E_0.txt", delimiter=",")
-    W_I = np.loadtxt("W_I_0.txt", delimiter=",")
+    W_rec = np.loadtxt(Paths.INIT_WEIGHTS_E, delimiter=",")
+    W_I = np.loadtxt(Paths.INIT_WEIGHTS_I, delimiter=",")
 
-    # W_rec = np.loadtxt("W_E_original.txt", delimiter=',')
-    # W_I = np.loadtxt("W_I_original.txt", delimiter=',')
     transition_prob = [[0, 0.1, 0.9], [0.1, 0, 0.9], [0.5, 0.5, 0]]
     pat_list = [0, 1, 2]
 
@@ -277,7 +277,7 @@ for loop in [0]:
             axis=0,
         )
 
-    np.savetxt("assembly_acvitities.txt", mean_firing_rate, delimiter=",")
+    np.savetxt(Paths.ASSEMBLY_ACVITITIES, mean_firing_rate, delimiter=",")
 
     firing_mat = f_list[0:N_E, 0:2000].T
 
