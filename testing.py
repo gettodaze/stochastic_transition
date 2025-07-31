@@ -30,16 +30,20 @@ import sklearn.decomposition
 from util import Paths
 import util
 
-sns.set(context="paper", style="white", font_scale=1.5, rc={"lines.linewidth": 2.5})
-sns.set_palette("muted")
 
-simplefilter(action="ignore", category=FutureWarning)
-util.configure_mpl()
-mpl.rcParams["axes.xmargin"] = 0
-mpl.rcParams["axes.ymargin"] = 0
+def configure():
+    sns.set_theme(
+        context="paper", style="white", font_scale=1.5, rc={"lines.linewidth": 2.5}
+    )
+    sns.set_palette("muted")
 
-epochs = 1
-for loop in [0]:
+    simplefilter(action="ignore", category=FutureWarning)
+    util.configure_mpl()
+    mpl.rcParams["axes.xmargin"] = 0
+    mpl.rcParams["axes.ymargin"] = 0
+
+
+def run_simulation():
     W_rec = np.loadtxt(Paths.INIT_WEIGHTS_E, delimiter=",")
     W_I = np.loadtxt(Paths.INIT_WEIGHTS_I, delimiter=",")
 
@@ -409,3 +413,8 @@ for loop in [0]:
     ax.spines["right"].set_color("none")
     ax.spines["top"].set_color("none")
     plt.savefig("raster_spont.pdf", dpi=350)
+
+
+if __name__ == "__main__":
+    configure()
+    run_simulation()
