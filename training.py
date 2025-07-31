@@ -17,14 +17,12 @@ limitations under the License.
 # coding: UTF-8
 from __future__ import division
 import numpy as np
-import pylab as pl
 import numba
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from tqdm import tqdm
 from warnings import simplefilter
 from numpy import linalg as LA
-import os
 
 simplefilter(action="ignore", category=FutureWarning)
 mpl.rcParams["svg.fonttype"] = "none"

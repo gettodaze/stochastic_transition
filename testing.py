@@ -26,8 +26,6 @@ import seaborn as sns
 from matplotlib import gridspec
 from warnings import simplefilter
 import sklearn.decomposition
-import os
-import shutil
 
 sns.set(context="paper", style="white", font_scale=1.5, rc={"lines.linewidth": 2.5})
 sns.set_palette("muted")
