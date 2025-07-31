@@ -68,7 +68,7 @@ def g(x):
 @numba.njit(parallel=True, fastmath=True, nogil=True)
 def learning(w, g_V_star, PSP_star, eps, g_V_som, mask):
     for i in numba.prange(len(w[:, 0])):
-        for l in numba.prange(len(w[0, :])):
+        for l in numba.prange(len(w[0, :])):  # noqa: E741
             delta = (-(g_V_star[i]) + g_V_som[i]) * PSP_star[l]
             w[i, l] += eps * delta
             w[i, l] *= mask[i, l]
