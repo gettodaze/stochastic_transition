@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 # coding: UTF-8
-from __future__ import division
+from __future__ import division, annotations
 import numpy as np
 import numba
 import matplotlib.pyplot as plt
@@ -25,6 +25,81 @@ from numpy import linalg as LA
 import typing as tp
 
 import util
+
+
+class SimOutput(tp.NamedTuple):
+    nsim: int
+    error_list: np.ndarray
+    error_filtered_list_E_mean: np.ndarray
+    error_filtered_list_E_std: np.ndarray
+    error_filtered_list_I_mean: np.ndarray
+    error_filtered_list_I_std: np.ndarray
+
+    @classmethod
+    def from_empty(cls, simtime_len: int, nsim: int) -> SimOutput:
+        return cls(
+            nsim=nsim,
+            error_list=np.zeros(simtime_len),
+            error_filtered_list_E_mean=np.zeros(simtime_len),
+            error_filtered_list_E_std=np.zeros(simtime_len),
+            error_filtered_list_I_mean=np.zeros(simtime_len),
+            error_filtered_list_I_std=np.zeros(simtime_len),
+        )
+
+    def _from_concat(cls, outputs: tp.Sequence[SimOutput]) -> tp.Self:
+        error_list = outputs[0].error_list  # note: we only keep the first one
+        expected_size = error_list.shape[0]
+        for o in outputs:
+            for arr in o:
+                if not isinstance(arr, np.ndarray):
+                    continue
+                if arr.ndim != 1:
+                    raise ValueError("All arrays must be 1D.")
+                if arr.shape[0] != expected_size:
+                    raise ValueError(
+                        f"All arrays must have the same length. Expected {expected_size}, got {arr.shape[0]}."
+                    )
+
+        E_means = [o.error_filtered_list_E_mean for o in outputs]
+        E_stds = [o.error_filtered_list_E_std for o in outputs]
+        I_means = [o.error_filtered_list_I_mean for o in outputs]
+        I_stds = [o.error_filtered_list_I_std for o in outputs]
+        return cls(
+            nsim=len(outputs),
+            error_list=error_list,
+            error_filtered_list_E_mean=np.vstack(E_means),
+            error_filtered_list_E_std=np.vstack(E_stds),
+            error_filtered_list_I_mean=np.vstack(I_means),
+            error_filtered_list_I_std=np.vstack(I_stds),
+        )
+
+    @classmethod
+    def save_all(cls, outputs: tp.Sequence[SimOutput]) -> None:
+
+        concatenated = cls._from_concat(outputs)
+
+        np.savetxt("error_list.txt", concatenated.error_list, delimiter=",")
+
+        np.savetxt(
+            "error_filtered_list_E_mean.txt",
+            concatenated.error_filtered_list_E_mean,
+            delimiter=",",
+        )
+        np.savetxt(
+            "error_filtered_list_E_std.txt",
+            concatenated.error_filtered_list_E_std,
+            delimiter=",",
+        )
+        np.savetxt(
+            "error_filtered_list_I_mean.txt",
+            concatenated.error_filtered_list_I_mean,
+            delimiter=",",
+        )
+        np.savetxt(
+            "error_filtered_list_I_std.txt",
+            concatenated.error_filtered_list_I_std,
+            delimiter=",",
+        )
 
 
 def run_simulations():
@@ -78,12 +153,9 @@ def run_simulations():
 
     state3_start_time = []
 
-    error_filtered_list_E_mean = np.zeros((n_sim, simtime_len))
-    error_filtered_list_E_std = np.zeros((n_sim, simtime_len))
-    error_filtered_list_I_mean = np.zeros((n_sim, simtime_len))
-    error_filtered_list_I_std = np.zeros((n_sim, simtime_len))
+    sim_outputs = []
     for sim in range(n_sim):
-        error_list = run_simulation(
+        sim_output = run_simulation(
             N_I=N_I,
             activation_f=activation_f,
             dur_state=dur_state,
@@ -101,26 +173,10 @@ def run_simulations():
             learning=learning,
             sim=sim,
             N=N,
-            error_filtered_list_E_mea=error_filtered_list_E_mean,
-            error_filtered_list_E_std=error_filtered_list_E_std,
-            error_filtered_list_I_mea=error_filtered_list_I_mean,
-            error_filtered_list_I_std=error_filtered_list_I_std,
         )
+        sim_outputs.append(sim_output)
 
-    np.savetxt("error_list.txt", error_list, delimiter=",")
-
-    np.savetxt(
-        "error_filtered_list_E_mean.txt", error_filtered_list_E_mean, delimiter=","
-    )
-    np.savetxt(
-        "error_filtered_list_E_std.txt", error_filtered_list_E_std, delimiter=","
-    )
-    np.savetxt(
-        "error_filtered_list_I_mean.txt", error_filtered_list_I_mean, delimiter=","
-    )
-    np.savetxt(
-        "error_filtered_list_I_std.txt", error_filtered_list_I_std, delimiter=","
-    )
+    SimOutput.save_all(sim_outputs)
 
 
 def run_simulation(
@@ -141,11 +197,7 @@ def run_simulation(
     learning: tp.Any,
     sim: tp.Any,
     N: tp.Any,
-    error_filtered_list_E_mean: np.ndarray,
-    error_filtered_list_E_std: np.ndarray,
-    error_filtered_list_I_mean: np.ndarray,
-    error_filtered_list_I_std: np.ndarray,
-) -> np.ndarray:
+) -> SimOutput:
     W_E = np.ones((N, N)) / np.sqrt(p_connect * N_E) * 1  # E connections
     W_E[0:N_E, 0:N_E] *= 0.1
     W_E_mask = np.zeros((N, N))  # E connectivity
@@ -213,7 +265,7 @@ def run_simulation(
     error_filtered_E = np.zeros(int(N_E / 1))
     error_filtered_I = np.zeros(int(N_E / 1))
 
-    error_list = np.zeros(simtime_len)
+    sim_output = SimOutput.from_empty(simtime_len, n_sim=sim)
     # training
     for i in tqdm(range(simtime_len), desc="[training]"):
         if i == pat_start:
@@ -286,11 +338,11 @@ def run_simulation(
                     int(0 * N_E / num_states) : int((2 + 1) * N_E / num_states)
                 ]
             )
-        error_filtered_list_E_mean[sim, i] = np.mean(np.abs(error_filtered_E))
-        error_filtered_list_E_std[sim, i] = np.std(np.abs(error_filtered_E))
+        sim_output.error_filtered_list_E_mean[i] = np.mean(np.abs(error_filtered_E))
+        sim_output.error_filtered_list_E_std[i] = np.std(np.abs(error_filtered_E))
 
-        error_filtered_list_I_mean[sim, i] = np.mean(np.abs(error_filtered_I))
-        error_filtered_list_I_std[sim, i] = np.std(np.abs(error_filtered_I))
+        sim_output.error_filtered_list_I_mean[i] = np.mean(np.abs(error_filtered_I))
+        sim_output.error_filtered_list_I_std[i] = np.std(np.abs(error_filtered_I))
 
         id_rec = np.random.rand(N) < f * dt * max_rate  # neuron id that emit spikes
 
@@ -318,7 +370,7 @@ def run_simulation(
             W_I_list[:, :, int(i / delta_weight_save)] = W_I[0:N_E, N_E:]
 
         # saving errors
-        error_list[i] = np.mean(f - activation_f(E_term))
+        sim_output.error_list[i] = np.mean(f - activation_f(E_term))
 
     # learning curve
     LC_E = []
