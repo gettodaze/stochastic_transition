@@ -83,7 +83,7 @@ def run_simulations():
     error_filtered_list_I_mean = np.zeros((n_sim, simtime_len))
     error_filtered_list_I_std = np.zeros((n_sim, simtime_len))
     for sim in range(n_sim):
-        run_simulation(
+        error_list = run_simulation(
             N_I=N_I,
             activation_f=activation_f,
             dur_state=dur_state,
@@ -93,18 +93,21 @@ def run_simulations():
             max_rate=max_rate,
             p_connect=p_connect,
             state3_start_time=state3_start_time,
+            transition_prob=transition_prob,
+            N_E=N_E,
+            num_states=num_states,
+            simtime_len=simtime_len,
+            dt=dt,
+            learning=learning,
+            sim=sim,
+            N=N,
+            error_filtered_list_E_mea=error_filtered_list_E_mean,
+            error_filtered_list_E_std=error_filtered_list_E_std,
+            error_filtered_list_I_mea=error_filtered_list_I_mean,
+            error_filtered_list_I_std=error_filtered_list_I_std,
         )
 
     np.savetxt("error_list.txt", error_list, delimiter=",")
-
-    np.savetxt("E_potential.txt", E_potential, delimiter=",")
-    np.savetxt("I_potential.txt", I_potential, delimiter=",")
-
-    np.savetxt("E_potential_sigmoid.txt", E_potential_sigmoid, delimiter=",")
-    np.savetxt("I_potential_sigmoid.txt", I_potential_sigmoid, delimiter=",")
-
-    np.savetxt("Ext_potential.txt", Ext_potential, delimiter=",")
-    np.savetxt("f_list.txt", f_list, delimiter=",")
 
     np.savetxt(
         "error_filtered_list_E_mean.txt", error_filtered_list_E_mean, delimiter=","
@@ -138,15 +141,11 @@ def run_simulation(
     learning: tp.Any,
     sim: tp.Any,
     N: tp.Any,
-):
-    E_potential = np.zeros(simtime_len)
-    I_potential = np.zeros(simtime_len)
-    E_potential_sigmoid = np.zeros(simtime_len)
-    I_potential_sigmoid = np.zeros(simtime_len)
-
-    Ext_potential = np.zeros(simtime_len)
-    f_list = np.zeros(simtime_len)
-
+    error_filtered_list_E_mean: np.ndarray,
+    error_filtered_list_E_std: np.ndarray,
+    error_filtered_list_I_mean: np.ndarray,
+    error_filtered_list_I_std: np.ndarray,
+) -> np.ndarray:
     W_E = np.ones((N, N)) / np.sqrt(p_connect * N_E) * 1  # E connections
     W_E[0:N_E, 0:N_E] *= 0.1
     W_E_mask = np.zeros((N, N))  # E connectivity
@@ -342,6 +341,8 @@ def run_simulation(
     np.savetxt("W_I_%s.txt" % (sim), W_I, delimiter=",")
 
     plt.close("all")
+
+    return error_list
 
 
 if __name__ == "__main__":
