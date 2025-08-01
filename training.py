@@ -394,7 +394,7 @@ def run_simulation(
 
     plt.close("all")
 
-    return error_list
+    return sim_output
 
 
 if __name__ == "__main__":
