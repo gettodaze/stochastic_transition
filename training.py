@@ -68,14 +68,17 @@ def run_simulation():
     dur_state = 200  # duration of states in ms
 
     eps = 10 ** (-5)  # learning rate
+    # JNOTE: the methods list 10^-4
 
     msecs_learning = 200 * 1000  # ms for learning
     simtime = np.arange(0, msecs_learning, dt)
     simtime_len = len(simtime)
 
+    # JNOTE: these are in ms
     tau_m = 15  # membrane time constant
     tau_syn = 5  # synaptic time constant
 
+    # JNOTE: paper says 50 Hz. This is not passed into sigmoid as alpha, but rather multiplied after the fact
     max_rate = 0.05  # maxumus firing rate of sigmoid
 
     p_connect = 0.5  # connection probability
@@ -208,6 +211,7 @@ def run_simulation():
                 2 * y
             )  # firing rate of neurons. y is scaled with a constant value of 2.
 
+            # JNOTE: is 30000 the 30s time constant for low pass error filter?
             if i > 0:
                 error_filtered_E = (1.0 - 1 / 30000) * error_filtered_E + (
                     f[int(0 * N_E / n_pat) : int((2 + 1) * N_E / n_pat)]
