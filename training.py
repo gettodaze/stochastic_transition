@@ -31,7 +31,7 @@ def run_simulation():
     # transition_prob = [[0,1/2,1/2,0,0],[1/3,0,1/3,1/3,0],[1/3,0,0,1/3,1/3],[0,1/2,1/2,0,0],[0,0,1,0,0]]
     # state_list = [0, 1, 2, 3,4]
     transition_prob = [[0, 0.1, 0.9], [0.1, 0, 0.9], [0.5, 0.5, 0]]
-    n_pat = len(transition_prob)  # num of states
+    num_states = len(transition_prob)  # num of states
 
     N = 1000  # network size
     N_E = int(N * 1 / 2)  # num of exc neurons
@@ -111,11 +111,11 @@ def run_simulation():
         id_rec = np.zeros(N, dtype=bool)  # neurons that spike (at each time)
 
         strength_input = 2  # strength of external input
-        input_mat = np.zeros((N, n_pat))  # set of external input
-        for i in range(n_pat):
-            input_mat[int(i * N_E / n_pat) : int((i + 1) * N_E / n_pat), i] = (
-                strength_input
-            )
+        input_mat = np.zeros((N, num_states))  # set of external input
+        for i in range(num_states):
+            input_mat[
+                int(i * N_E / num_states) : int((i + 1) * N_E / num_states), i
+            ] = strength_input
 
         """
         Training
@@ -142,17 +142,17 @@ def run_simulation():
 
         W_E_between = np.ones((N, N))
         W_E_between[:, N_E:] *= 0
-        for i in range(n_pat):
+        for i in range(num_states):
             W_E_between[
-                int(i * N_E / n_pat) : int((i + 1) * N_E / n_pat),
-                int(i * N_E / n_pat) : int((i + 1) * N_E / n_pat),
+                int(i * N_E / num_states) : int((i + 1) * N_E / num_states),
+                int(i * N_E / num_states) : int((i + 1) * N_E / num_states),
             ] *= 0
         W_E_within = np.zeros((N, N))
         W_E_within[:, N_E:] *= 0
-        for i in range(n_pat):
+        for i in range(num_states):
             W_E_within[
-                int(i * N_E / n_pat) : int((i + 1) * N_E / n_pat),
-                int(i * N_E / n_pat) : int((i + 1) * N_E / n_pat),
+                int(i * N_E / num_states) : int((i + 1) * N_E / num_states),
+                int(i * N_E / num_states) : int((i + 1) * N_E / num_states),
             ] = 1
 
         error_filtered_E = np.zeros(int(N_E / 1))
@@ -170,7 +170,7 @@ def run_simulation():
                 ### updating state
                 next_prob = transition_prob[pattern_id]
                 dice = np.random.rand()
-                for xx in range(n_pat):
+                for xx in range(num_states):
                     if dice > np.sum(next_prob[0:xx]):
                         if dice <= np.sum(next_prob[0 : xx + 1]):
                             pattern_id = xx
@@ -203,32 +203,32 @@ def run_simulation():
             # JNOTE: is 30000 the 30s time constant for low pass error filter?
             if i > 0:
                 error_filtered_E = (1.0 - 1 / 30000) * error_filtered_E + (
-                    f[int(0 * N_E / n_pat) : int((2 + 1) * N_E / n_pat)]
+                    f[int(0 * N_E / num_states) : int((2 + 1) * N_E / num_states)]
                     - activation_f(E_term)[
-                        int(0 * N_E / n_pat) : int((2 + 1) * N_E / n_pat)
+                        int(0 * N_E / num_states) : int((2 + 1) * N_E / num_states)
                     ]
                 ) / 30000
                 error_filtered_I = (1.0 - 1 / 30000) * error_filtered_I + (
                     activation_f(E_term)[
-                        int(0 * N_E / n_pat) : int((2 + 1) * N_E / n_pat)
+                        int(0 * N_E / num_states) : int((2 + 1) * N_E / num_states)
                     ]
                     - activation_f(I_term)[
-                        int(0 * N_E / n_pat) : int((2 + 1) * N_E / n_pat)
+                        int(0 * N_E / num_states) : int((2 + 1) * N_E / num_states)
                     ]
                 ) / 30000
             else:
                 error_filtered_E = (
-                    f[int(0 * N_E / n_pat) : int((2 + 1) * N_E / n_pat)]
+                    f[int(0 * N_E / num_states) : int((2 + 1) * N_E / num_states)]
                     - activation_f(E_term)[
-                        int(0 * N_E / n_pat) : int((2 + 1) * N_E / n_pat)
+                        int(0 * N_E / num_states) : int((2 + 1) * N_E / num_states)
                     ]
                 )
                 error_filtered_I = (
                     activation_f(E_term)[
-                        int(0 * N_E / n_pat) : int((2 + 1) * N_E / n_pat)
+                        int(0 * N_E / num_states) : int((2 + 1) * N_E / num_states)
                     ]
                     - activation_f(I_term)[
-                        int(0 * N_E / n_pat) : int((2 + 1) * N_E / n_pat)
+                        int(0 * N_E / num_states) : int((2 + 1) * N_E / num_states)
                     ]
                 )
             error_filtered_list_E_mean[sim, i] = np.mean(np.abs(error_filtered_E))
