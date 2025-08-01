@@ -31,8 +31,7 @@ def run_simulation():
     # transition_prob = [[0,1/2,1/2,0,0],[1/3,0,1/3,1/3,0],[1/3,0,0,1/3,1/3],[0,1/2,1/2,0,0],[0,0,1,0,0]]
     # state_list = [0, 1, 2, 3,4]
     transition_prob = [[0, 0.1, 0.9], [0.1, 0, 0.9], [0.5, 0.5, 0]]
-    state_list = [0, 1, 2]
-    n_pat = len(set(state_list))  # num of states
+    n_pat = len(transition_prob)  # num of states
 
     N = 1000  # network size
     N_E = int(N * 1 / 2)  # num of exc neurons
@@ -76,7 +75,6 @@ def run_simulation():
     p_connect = 0.5  # connection probability
 
     n_sim = 1
-    state_list = np.zeros((simtime_len, n_sim))
 
     state3_start_time = []
 
@@ -178,7 +176,6 @@ def run_simulation():
                             pattern_id = xx
                             break
 
-                # print(state_list[i + dur_state:i + 2 * dur_state,sim])
             # updating recurrent synaptic current and PSP
             I_syn = (1.0 - dt / tau_syn) * I_syn
             I_syn[id_rec] += 1 / tau_m / tau_syn
