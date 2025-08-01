@@ -27,7 +27,7 @@ from matplotlib import gridspec
 from warnings import simplefilter
 import sklearn.decomposition
 
-from util import Paths
+from util import Paths, get_activation_function
 import util
 
 
@@ -58,16 +58,9 @@ def run_simulation():
 
     np.random.seed()
 
-    alpha = 1
-    theta = 1
-    beta = 5
+    activation_f = get_activation_function()
 
-    @numba.njit(fastmath=True, nogil=True)
-    def g(x):
-        ans = 1 / (1 + alpha * np.exp(beta * (-x + theta)))
-        return ans
-
-    vfunc = np.vectorize(g)
+    vfunc = np.vectorize(activation_f)
     fig = plt.figure(figsize=(4, 4))
     ax1 = fig.add_subplot(111)
     pl.plot(np.arange(-1, 2, 0.01), vfunc(np.arange(-1, 2, 0.01)))
@@ -86,7 +79,7 @@ def run_simulation():
     gain = 1
     y = np.random.rand(N)
 
-    f = g(y)
+    f = activation_f(y)
 
     tau_m = 15
     tau_syn = 5
@@ -113,7 +106,7 @@ def run_simulation():
 
     y = np.random.rand(N)
 
-    f = g(y)
+    f = activation_f(y)
 
     tau_m = 15
     tau_syn = 5
@@ -165,7 +158,7 @@ def run_simulation():
 
         y = 2 * x / max_trace
 
-        f = g(y)
+        f = activation_f(y)
 
         id_rec = np.random.rand(N) < f * dt * max_rate
 
@@ -198,7 +191,7 @@ def run_simulation():
 
         y = 2 * x / max_trace
 
-        f = g(y)
+        f = activation_f(y)
 
         for mm in range(n_pat):
             EPSCs[mm, i] = np.mean(

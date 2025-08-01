@@ -38,15 +38,7 @@ def run_simulation():
     N_E = int(N * 1 / 2)  # num of exc neurons
     N_I = N - N_E  # num of inh neurons
 
-    ## activation function
-    alpha = 1
-    theta = 1
-    beta = 5
-
-    @numba.njit(fastmath=True, nogil=True)
-    def g(x):
-        ans = 1 / (1 + alpha * np.exp(beta * (-x + theta)))
-        return ans
+    activation_f = util.get_activation_function()
 
     ###
 
@@ -207,7 +199,7 @@ def run_simulation():
                 x / max_trace
             )  # normalized membrane potential with max_trace. This will be replaced with homeostatis of weights?
 
-            f = g(
+            f = activation_f(
                 2 * y
             )  # firing rate of neurons. y is scaled with a constant value of 2.
 
@@ -215,20 +207,32 @@ def run_simulation():
             if i > 0:
                 error_filtered_E = (1.0 - 1 / 30000) * error_filtered_E + (
                     f[int(0 * N_E / n_pat) : int((2 + 1) * N_E / n_pat)]
-                    - g(E_term)[int(0 * N_E / n_pat) : int((2 + 1) * N_E / n_pat)]
+                    - activation_f(E_term)[
+                        int(0 * N_E / n_pat) : int((2 + 1) * N_E / n_pat)
+                    ]
                 ) / 30000
                 error_filtered_I = (1.0 - 1 / 30000) * error_filtered_I + (
-                    g(E_term)[int(0 * N_E / n_pat) : int((2 + 1) * N_E / n_pat)]
-                    - g(I_term)[int(0 * N_E / n_pat) : int((2 + 1) * N_E / n_pat)]
+                    activation_f(E_term)[
+                        int(0 * N_E / n_pat) : int((2 + 1) * N_E / n_pat)
+                    ]
+                    - activation_f(I_term)[
+                        int(0 * N_E / n_pat) : int((2 + 1) * N_E / n_pat)
+                    ]
                 ) / 30000
             else:
                 error_filtered_E = (
                     f[int(0 * N_E / n_pat) : int((2 + 1) * N_E / n_pat)]
-                    - g(E_term)[int(0 * N_E / n_pat) : int((2 + 1) * N_E / n_pat)]
+                    - activation_f(E_term)[
+                        int(0 * N_E / n_pat) : int((2 + 1) * N_E / n_pat)
+                    ]
                 )
                 error_filtered_I = (
-                    g(E_term)[int(0 * N_E / n_pat) : int((2 + 1) * N_E / n_pat)]
-                    - g(I_term)[int(0 * N_E / n_pat) : int((2 + 1) * N_E / n_pat)]
+                    activation_f(E_term)[
+                        int(0 * N_E / n_pat) : int((2 + 1) * N_E / n_pat)
+                    ]
+                    - activation_f(I_term)[
+                        int(0 * N_E / n_pat) : int((2 + 1) * N_E / n_pat)
+                    ]
                 )
             error_filtered_list_E_mean[sim, i] = np.mean(np.abs(error_filtered_E))
             error_filtered_list_E_std[sim, i] = np.std(np.abs(error_filtered_E))
@@ -240,14 +244,19 @@ def run_simulation():
 
             # training. only synapses onto E-neurons are plastic.
             W_E[0:N_E, :] = learning(
-                W_E[0:N_E, :], g(E_term)[0:N_E], PSP, eps, f[0:N_E], W_E_mask[0:N_E, :]
+                W_E[0:N_E, :],
+                activation_f(E_term)[0:N_E],
+                PSP,
+                eps,
+                f[0:N_E],
+                W_E_mask[0:N_E, :],
             )
             W_I[0:N_E, :] = learning(
                 W_I[0:N_E, :],
-                g(I_term)[0:N_E],
+                activation_f(I_term)[0:N_E],
                 PSP,
                 eps,
-                g(E_term)[0:N_E],
+                activation_f(E_term)[0:N_E],
                 W_I_mask[0:N_E, :],
             )
 
@@ -257,7 +266,7 @@ def run_simulation():
                 W_I_list[:, :, int(i / delta_weight_save)] = W_I[0:N_E, N_E:]
 
             # saving errors
-            error_list[i] = np.mean(f - g(E_term))
+            error_list[i] = np.mean(f - activation_f(E_term))
 
         # learning curve
         LC_E = []

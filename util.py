@@ -1,4 +1,6 @@
 import matplotlib as mpl
+import numba
+import numpy as np
 
 
 class Paths:
@@ -21,3 +23,16 @@ def configure_mpl():
     #     "text.usetex": False,
     #     "figure.figsize": [10 / 2.54, 6 / 2.54],
     # }
+
+
+def get_activation_function():
+    alpha = 1
+    theta = 1
+    beta = 5
+
+    @numba.njit(fastmath=True, nogil=True)
+    def g(x):
+        ans = 1 / (1 + alpha * np.exp(beta * (-x + theta)))
+        return ans
+
+    return g
