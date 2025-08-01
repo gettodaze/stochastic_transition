@@ -46,7 +46,7 @@ class SimOutput(tp.NamedTuple):
             error_filtered_list_I_std=np.zeros(simtime_len),
         )
 
-    def _from_concat(cls, outputs: tp.Sequence[SimOutput]) -> tp.Self:
+    def _from_concat(cls, outputs: tp.Sequence[SimOutput]) -> SimOutput:
         error_list = outputs[0].error_list  # note: we only keep the first one
         expected_size = error_list.shape[0]
         for o in outputs:
