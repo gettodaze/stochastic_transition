@@ -1,12 +1,24 @@
 import matplotlib as mpl
 import numba
 import numpy as np
+from pathlib import Path
+
+DATA_DIR = Path(__file__).parent / "data"
+DATA_DIR.mkdir(exist_ok=True)
 
 
 class Paths:
-    ASSEMBLY_ACVITITIES = "assembly_acvitities.txt"
-    INIT_WEIGHTS_E = "W_E_0.txt"
-    INIT_WEIGHTS_I = "W_I_0.txt"
+    ASSEMBLY_ACVITITIES = DATA_DIR / "assembly_acvitities.txt"
+    FMT_WEIGHTS_E_FN = "W_E_{sim_n}.txt"
+    FMT_WEIGHTS_I_FN = "W_I_{sim_n}.txt"
+
+    @classmethod
+    def get_path_weights_e(cls, sim_n: int) -> Path:
+        return DATA_DIR / cls.FMT_WEIGHTS_E_FN.format(sim_n=sim_n)
+
+    @classmethod
+    def get_path_weights_i(cls, sim_n: int) -> Path:
+        return DATA_DIR / cls.FMT_WEIGHTS_I_FN.format(sim_n=sim_n)
 
 
 def configure_mpl():

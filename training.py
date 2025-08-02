@@ -119,9 +119,10 @@ def run_simulations():
 
     ## learning rule
     @numba.njit(parallel=True, fastmath=True, nogil=True)
-    def learning(w, g_V_star, PSP_star, eps, g_V_som, mask):
-        for i in numba.prange(len(w[:, 0])):
-            for l in numba.prange(len(w[0, :])):  # noqa: E741
+    def learning(w: np.ndarray, g_V_star, PSP_star, eps, g_V_som, mask):
+        n_rows, n_cols = w.shape
+        for i in numba.prange(n_rows):
+            for l in numba.prange(n_cols):  # noqa: E741
                 delta = (-(g_V_star[i]) + g_V_som[i]) * PSP_star[l]
                 w[i, l] += eps * delta
                 w[i, l] *= mask[i, l]
@@ -199,8 +200,9 @@ def run_simulation(
     N: tp.Any,
 ) -> SimOutput:
     W_E = np.ones((N, N)) / np.sqrt(p_connect * N_E) * 1  # E connections
-    W_E[0:N_E, 0:N_E] *= 0.1
+    W_E[0:N_E, 0:N_E] *= 0.1  # JNOTE: interesting
     W_E_mask = np.zeros((N, N))  # E connectivity
+    # JNOTE: connections from E to all
     W_E_mask[:, 0:N_E] = np.random.rand(N, N_E) < p_connect
     W_E_mask[np.eye(N, dtype=bool)] = 0
     W_E *= W_E_mask
@@ -208,9 +210,11 @@ def run_simulation(
     W_I = np.ones((N, N)) / np.sqrt(p_connect * N_I) * 1  # I connections
     W_I[0:N_E, N_E:] *= 0.1
     W_I_mask = np.zeros((N, N))  # I connectivity
+    # JNOTE: connections from I to all
     W_I_mask[:, N_E:] = np.random.rand(N, N_I) < p_connect
     W_I_mask[np.eye(N, dtype=bool)] = 0
     W_I *= W_I_mask
+    # theoretically, all weights would be W_I + W_E
 
     I_syn = np.zeros(N)  # synaptic current
     PSP = np.zeros(N)  # post synaptic potential
@@ -247,20 +251,22 @@ def run_simulation(
         (N_E, N_I, int(simtime_len / delta_weight_save))
     )  # array of saved W_I
 
-    W_E_between = np.ones((N, N))
-    W_E_between[:, N_E:] *= 0
-    for i in range(num_states):
-        W_E_between[
-            int(i * N_E / num_states) : int((i + 1) * N_E / num_states),
-            int(i * N_E / num_states) : int((i + 1) * N_E / num_states),
-        ] *= 0
-    W_E_within = np.zeros((N, N))
-    W_E_within[:, N_E:] *= 0
-    for i in range(num_states):
-        W_E_within[
-            int(i * N_E / num_states) : int((i + 1) * N_E / num_states),
-            int(i * N_E / num_states) : int((i + 1) * N_E / num_states),
-        ] = 1
+    # JNOTE: these are unused
+
+    # W_E_between = np.ones((N, N))
+    # W_E_between[:, N_E:] *= 0
+    # for i in range(num_states):
+    #     W_E_between[
+    #         int(i * N_E / num_states) : int((i + 1) * N_E / num_states),
+    #         int(i * N_E / num_states) : int((i + 1) * N_E / num_states),
+    #     ] *= 0
+    # W_E_within = np.zeros((N, N))
+    # W_E_within[:, N_E:] *= 0
+    # for i in range(num_states):
+    #     W_E_within[
+    #         int(i * N_E / num_states) : int((i + 1) * N_E / num_states),
+    #         int(i * N_E / num_states) : int((i + 1) * N_E / num_states),
+    #     ] = 1
 
     error_filtered_E = np.zeros(int(N_E / 1))
     error_filtered_I = np.zeros(int(N_E / 1))
@@ -356,7 +362,7 @@ def run_simulation(
             W_E_mask[0:N_E, :],
         )
         W_I[0:N_E, :] = learning(
-            W_I[0:N_E, :],
+            W_I[0:N_E, :],  # JNOTE: why N_E and not N_I here?
             activation_f(I_term)[0:N_E],
             PSP,
             eps,
@@ -389,8 +395,8 @@ def run_simulation(
     # saving reshaped array to file.
     np.savetxt("W_E_list.txt", arr_reshaped)
 
-    np.savetxt("W_E_%s.txt" % (sim), W_E, delimiter=",")
-    np.savetxt("W_I_%s.txt" % (sim), W_I, delimiter=",")
+    np.savetxt(util.Paths.get_path_weights_e(sim), W_E, delimiter=",")
+    np.savetxt(util.Paths.get_path_weights_i(sim), W_I, delimiter=",")
 
     plt.close("all")
 

@@ -44,8 +44,10 @@ def configure():
 
 
 def run_simulation():
-    W_rec = np.loadtxt(Paths.INIT_WEIGHTS_E, delimiter=",")
-    W_I = np.loadtxt(Paths.INIT_WEIGHTS_I, delimiter=",")
+    weights_e_init = Paths.get_path_weights_e(0)
+    weights_i_init = Paths.get_path_weights_i(0)
+    W_rec = np.loadtxt(weights_e_init, delimiter=",")
+    W_I = np.loadtxt(weights_i_init, delimiter=",")
 
     pat_list = [0, 1, 2]
 
