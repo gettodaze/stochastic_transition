@@ -62,6 +62,10 @@ def run_simulation():
     transition_prob = normalize(transition_prob, axis=1, norm='l1')
     pat_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
     """
+    if not Paths.ASSEMBLY_ACVITITIES.is_file():
+        raise FileNotFoundError(
+            f"Could not find assembly activities file. Did you run the testing file? {Paths.ASSEMBLY_ACVITITIES}"
+        )
     mean_firing_rate = np.loadtxt(Paths.ASSEMBLY_ACVITITIES, delimiter=",")
 
     activation_threshold = (

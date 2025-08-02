@@ -44,10 +44,18 @@ def configure():
 
 
 def run_simulation():
-    weights_e_init = Paths.get_path_weights_e(0)
-    weights_i_init = Paths.get_path_weights_i(0)
-    W_rec = np.loadtxt(weights_e_init, delimiter=",")
-    W_I = np.loadtxt(weights_i_init, delimiter=",")
+    weights_e_path = Paths.get_path_weights_e(0)
+    weights_i_path = Paths.get_path_weights_i(0)
+    if not weights_e_path.is_file():
+        raise FileNotFoundError(
+            f"Could not find initial E weights at {weights_e_path}. Please run the training file and confirm its output."
+        )
+    if not weights_i_path.is_file():
+        raise FileNotFoundError(
+            f"Could not find initial I weights at {weights_i_path}. Please run the training file and confirm its output."
+        )
+    W_rec = np.loadtxt(weights_e_path, delimiter=",")
+    W_I = np.loadtxt(weights_i_path, delimiter=",")
 
     pat_list = [0, 1, 2]
 
